@@ -31,9 +31,30 @@ tavily_extract = TavilyExtract()
 tavily_map = TavilyMap(max_depth=5, max_breadth=20, max_pages=1000)
 tavily_crawl = TavilyCrawl()
 
-def main():
-    print("Hello from langchaindocumentassistant!")
+async def main():
+    """Main asyn function to orchestrate the entire process"""
+    log_header("Documentation INGESTION PIPELINE")
 
+    log_info("TavilyCrawl: Starting to Crawl documentation from https://python.langchain.com/", Colors.PURPLE,)
+
+    # crawl the documentation site
+
+    res = tavily_crawl.invoke(
+        {
+        "url": "https://python.langchain.com/",
+        "max_depth": 1, #Best practice is to start with 1-2 review then increase IF NEEDED
+        "extract_depth": "advanced",# advanced has higher success rate but may increase latency
+        "instructions": "content on ai agents"
+        }
+    )
+    
+    all_docs = [Document(page_content=results['raw_content'], metadata={"source": results['url']}) for results in res['results']]
+    
+    log_success(
+        f"TavilyCrawl:Sucessfully crawled {len(all_docs)}URLS from documentation site"
+    )
+
+    
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
