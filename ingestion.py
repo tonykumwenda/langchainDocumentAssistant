@@ -42,7 +42,7 @@ async def main():
     res = tavily_crawl.invoke(
         {
         "url": "https://python.langchain.com/",
-        "max_depth": 1, #Best practice is to start with 1-2 review then increase IF NEEDED
+        "max_depth": 5, #Best practice is to start with 1-2 review then increase IF NEEDED
         "extract_depth": "advanced",# advanced has higher success rate but may increase latency
         "instructions": "content on ai agents"
         }
@@ -54,6 +54,15 @@ async def main():
         f"TavilyCrawl:Sucessfully crawled {len(all_docs)}URLS from documentation site"
     )
 
+    # Split documents into chunks
+    log_header("Document Chunking Phase")
+    log_info(f"Text Splitter: Processing {len(all_docs)} documents with 4000 chunk size and 200 overlap", Colors.YELLOW,)
+
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=4000, chunk_overlap=200)
+    split_docs = text_splitter.split_documents(all_docs)
+    log_success(
+        f"Text Splitter: Created {len(split_docs)} chunks from {len(all_docs)} documents"
+    )
     
 
 if __name__ == "__main__":
